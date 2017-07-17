@@ -7,10 +7,16 @@ using System.Collections;
 
 public enum BoxStat
 {
-    None,
-    Number,
-    Bomb,
-    Flag,
+    None,//空
+    Number,//数字
+    Bomb,//炸弹
+    Flag,//棋子
+}
+public enum ClickStat
+{
+    None,//没点击的
+    flag,//点成旗子的
+    open,//打开了的
 }
 
 public class Base : MonoBehaviour,IPointerClickHandler {
@@ -22,6 +28,7 @@ public class Base : MonoBehaviour,IPointerClickHandler {
     bool isClick=false;
 
     public BoxStat Bs=BoxStat.None;
+    public ClickStat Cs = ClickStat.None;
     BoxStat TempBs;
     public List<Base> aroundBaseList = new List<Base>();
     private void Awake()
@@ -36,7 +43,6 @@ public class Base : MonoBehaviour,IPointerClickHandler {
 	}
     void Init()
     {
-        
         BomNum = 0;
         //设置默认图片
         //关闭文字显示
@@ -58,8 +64,6 @@ public class Base : MonoBehaviour,IPointerClickHandler {
                 Bs = BoxStat.Number;
             }
         }
-        TempBs = Bs;
-
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -68,24 +72,25 @@ public class Base : MonoBehaviour,IPointerClickHandler {
         if (PointerEventData.InputButton.Left==eventData.button&&Bs!=BoxStat.Flag)
         {
             //左键单击
+            Cs = ClickStat.open;
             StartCoroutine(ClickEvent());
         }
         else if (PointerEventData.InputButton.Right == eventData.button)
         {
             //右键点击
-            if (Bs==BoxStat.Flag)
+            if (Cs == ClickStat.flag)
             {
-                Bs = TempBs;
-                //TODO 回复图片
+                //TODO 回复成为点击图片
                 image.color = Color.white;
+                InitManger.Instance.FlagList.Remove(this);
             }
-            else
+            else if (Cs == ClickStat.None)
             {
-                Bs = BoxStat.Flag;
-                //TODO 旗帜图片
+                Cs = ClickStat.flag;
+                //TODO 变成棋子图片
                 image.color = Color.blue;
+                InitManger.Instance.FlagList.Add(this);
             }
-            
         }
         
 
@@ -98,7 +103,7 @@ public class Base : MonoBehaviour,IPointerClickHandler {
             isClick = true;
             if (Bs == BoxStat.None)
             {
-                //周围所有都格子都点雷
+                //周围格子都没有雷 周围所有都格子都打开
                 foreach (var item in aroundBaseList)
                 {
                     StartCoroutine(item.ClickEvent());

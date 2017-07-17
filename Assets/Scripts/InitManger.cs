@@ -11,8 +11,9 @@ public class InitManger : MonoBehaviour {
     GameObject BasePre;
     Transform Parent;
     public Action BackFunc;
-    int BomNum;
-    public int FlagNum;
+
+    List<Base> BomList=new List<Base>();
+    public List<Base> FlagList = new List<Base>();
     
     public static InitManger Instance;
     private void Awake()
@@ -23,6 +24,7 @@ public class InitManger : MonoBehaviour {
         baseArr = new Base[hig, len];
         StartCoroutine(InitBase());
     }
+
     IEnumerator InitBase()
     {
         yield return new WaitForFixedUpdate();
@@ -40,11 +42,13 @@ public class InitManger : MonoBehaviour {
                 if (UnityEngine.Random.Range(0,5)==0)
                 {
                     b.Bs = BoxStat.Bomb;
+                    BomList.Add(b);
                 }
             }
         }
         BackFunc();
     }
+
     /// <summary>
     /// 根据格子获得周围格子
     /// </summary>
@@ -70,5 +74,28 @@ public class InitManger : MonoBehaviour {
         }
         return LB;
     }
+
+    /// <summary>
+    /// 输赢判断
+    /// </summary>
+    /// <returns></returns>
+    public bool WinOrLose()
+    {
+        if (FlagList.Count!=BomList.Count)
+        {
+            return false;
+        }
+        foreach (var item in FlagList)
+        {
+            if (!BomList.Contains(item))
+            {
+                //只要有一个不在列表里面。就不对
+                return false;
+            }
+        }
+        return true;
+    }
+
+
     //TODO 后续 当旗子数量和位置相同时。判断输赢
 }
